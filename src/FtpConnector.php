@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Helpers;
-
+namespace Supsign\LaravelFtpConnector;
 
 class FtpConnector {
     protected 
