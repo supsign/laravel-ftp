@@ -181,7 +181,7 @@ class FtpConnector {
     }
 
     protected function setConnection() {
-        $this->protocol     = $connection->protocol()
+        $this->protocol     = $connection->protocol();
         $this->server       = $connection->server();
         $this->port         = $connection->port();
         $this->password     = $connection->password();
@@ -223,10 +223,10 @@ class FtpConnector {
             $currentDir = scandir($dir);
 
             foreach ($currentDir AS $entry) {
-                if ($entry{0} == '.')
+                if ($entry[0] == '.')
                     continue;
 
-                if ($entry{0} == '~')
+                if ($entry[0] == '~')
                     continue;
 
                 if (is_dir($dir.$entry)) {
