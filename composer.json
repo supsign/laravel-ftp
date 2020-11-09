@@ -1,0 +1,26 @@
+{
+    "name": "supsign/laravel-ftp-connector",
+    "description": "Laravel Extension for Handling FTP connections",
+    "keywords": ["composer", "script", "myFactory"],
+    "license": "MIT",
+    "authors": [
+    {
+        "name": "Florian Ratz",
+        "email": "florian.ratz@supsign.ch"
+    }],
+    "autoload": {
+        "psr-4": {
+            "Supsign\\LaravelFtpConnector\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Supsign\\LaravelFtpConnector\\LaravelFtpConnectorServiceProvider"
+            ],
+            "aliases": {
+                "FtpConnector": "Supsign\\LaravelFtpConnector\\FtpConnector"
+            }
+        }
+    }
+}
