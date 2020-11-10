@@ -23,19 +23,25 @@ class FtpConnector {
         $syncConfigs = null,
         $user = null;
 
-    public function __construct() {
-        return $this;
+    public function __construct($ftpData) {
+        $this->protocol = env($ftpData.'_FTP_MODE');
+        $this->server = env($ftpData.'_FTP_HOST');
+        $this->port = env($ftpData.'_FTP_LOGIN');
+        $this->password = env($ftpData.'_FTP_PORT');
+        $this->user = env($ftpData.'_FTP_PASSWORD');
+
+        return $this->connect();
     }
 
     protected function connect() {
         switch ($this->protocol) {
             case 'FTP':
-                $this->connection = ftp_connect($this->server, $this->port);
+                $this->connection = ftp_connect($this->server, (int)$this->port);
                 break;
             
             case 'SFTP':
             default:
-                $this->connection = ssh2_connect($this->server, $this->port);
+                $this->connection = ssh2_connect($this->server, (int)$this->port);
                 break;
         }
 
@@ -178,16 +184,6 @@ class FtpConnector {
 
     protected function readRemoteFile() {
         return $this->readFile('remote');
-    }
-
-    protected function setConnection() {
-        $this->protocol     = $connection->protocol();
-        $this->server       = $connection->server();
-        $this->port         = $connection->port();
-        $this->password     = $connection->password();
-        $this->user         = $connection->user();
-
-        return $this->connect();
     }
 
     protected function setLocalDirectory($dir) {
