@@ -26,9 +26,10 @@ class FtpConnector {
     public function __construct($ftpData) {
         $this->protocol = env($ftpData.'_FTP_MODE');
         $this->server = env($ftpData.'_FTP_HOST');
-        $this->port = env($ftpData.'_FTP_LOGIN');
-        $this->password = env($ftpData.'_FTP_PORT');
-        $this->user = env($ftpData.'_FTP_PASSWORD');
+        $this->port = env($ftpData.'_FTP_PORT');
+        $this->user = env($ftpData.'_FTP_LOGIN');
+        $this->password = env($ftpData.'_FTP_PASSWORD');
+
 
         return $this->connect();
     }
