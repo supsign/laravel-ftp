@@ -20,7 +20,6 @@ class FtpConnector {
         $port = null,
         $protocol = null,
         $server = null,
-        $syncConfigs = null,
         $user = null;
 
     public function __construct($ftpData) {
@@ -30,14 +29,19 @@ class FtpConnector {
         $this->user = env($ftpData.'_FTP_LOGIN');
         $this->password = env($ftpData.'_FTP_PASSWORD');
 
+        $this->remoteDirectory = '.';
 
-        return $this->connect();
+
+        return $this->connect()->login();
     }
 
     protected function connect() {
         switch ($this->protocol) {
             case 'FTP':
                 $this->connection = ftp_connect($this->server, (int)$this->port);
+
+                // ftp_pasv($this->connection, true);
+
                 break;
             
             case 'SFTP':
@@ -56,7 +60,16 @@ class FtpConnector {
     }
 
     protected function delteFile($source) {
-        unlink($this->getFilePath($source));
+        switch (true) {
+            case $this->protocol = 'FTP' AND $source == 'remote':
+                ftp_delete($this->getFilePath($source));
+                break;
+            
+            default:
+            case 'SFTP':
+                unlink($this->getFilePath($source));
+                break;
+        }
 
         return $this;
     }
@@ -70,7 +83,15 @@ class FtpConnector {
     }
 
     protected function downloadFile() {
-        copy($this->remoteFile, $this->localFile);
+        switch ($this->protocol) {
+            case 'FTP':
+                ftp_get($this->connection, $this->localFile, $this->remoteFile);
+                break;
+            
+            case 'SFTP':
+                copy($this->remoteFile, $this->localFile);
+                break;
+        }
 
         return $this;
     }
@@ -142,7 +163,9 @@ class FtpConnector {
 
         switch ($this->protocol) {
             case 'FTP':
-                # code...
+                $this->login = ftp_login($this->connection, $this->user, $this->password);
+
+                var_dump($this->login);
                 break;
                         
             case 'SFTP':
@@ -162,13 +185,23 @@ class FtpConnector {
     }
 
     protected function uploadFile() {
-        copy($this->localFile, $this->remoteFile);
+        switch ($this->protocol) {
+            case 'FTP':
+                ftp_put($this->connection, $this->remoteFile, $this->localFile);
+                break;
+            
+            case 'SFTP':
+                copy($this->localFile, $this->remoteFile);
+                break;
+        }
+
+        
 
         return $this;
     }
 
     protected function readLocalDirectory() {
-        return self::readDirectory($this->localDirectory);
+        return $this->readDirectory($this->localDirectory);
     }
 
     protected function readFile($source) {
@@ -179,8 +212,8 @@ class FtpConnector {
         return $this->readFile('local');
     }
 
-    protected function readRemoteDirectory() {
-        return self::readDirectory($this->remoteDirectory);
+    public function readRemoteDirectory() {
+        return $this->readDirectory($this->remoteDirectory);
     }
 
     protected function readRemoteFile() {
@@ -213,31 +246,68 @@ class FtpConnector {
         return $this;
     }
 
-    protected static function readDirectory($dir) {
-        $files = [];
-        
-        if (file_exists($dir) AND is_dir($dir)) {
-            $currentDir = scandir($dir);
+    protected function readDirectory($dir) {        
+        switch ($this->protocol) {
+            case 'FTP':
+                return ftp_nlist($this->connection, $this->remoteDirectory);
+                break;
+            
+            case 'SFTP':
+                $files = [];
 
-            foreach ($currentDir AS $entry) {
-                if ($entry[0] == '.')
-                    continue;
+                if (file_exists($dir) AND is_dir($dir)) {
+                    $currentDir = scandir($dir);
 
-                if ($entry[0] == '~')
-                    continue;
+                    foreach ($currentDir AS $entry) {
+                        if ($entry[0] == '.')
+                            continue;
 
-                if (is_dir($dir.$entry)) {
-                    $entry .= '/';
+                        if ($entry[0] == '~')
+                            continue;
 
-                    foreach (self::readDirectory($dir.$entry) AS $subEntry)
-                        $files[] = $entry.$subEntry;
+                        if (is_dir($dir.$entry)) {
+                            $entry .= '/';
 
-                    continue;
+                            foreach ($this->readDirectory($dir.$entry) AS $subEntry)
+                                $files[] = $entry.$subEntry;
+
+                            continue;
+                        }
+
+                        $files[] = $entry;
+                    }
                 }
-
-                $files[] = $entry;
-            }
+                break;
         }
+
         return $files;
     }
+
+    public function test()
+    {
+
+        $this->login();
+
+        var_dump($this->connection, $this->remoteDirectory);
+
+
+        // return ftp_get($this->connection, 'test.csv', 'test.csv');
+
+        return ftp_nlist($this->connection, $this->remoteDirectory);
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
 }
