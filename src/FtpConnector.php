@@ -165,7 +165,9 @@ class FtpConnector {
             case 'FTP':
                 $this->login = ftp_login($this->connection, $this->user, $this->password);
 
-                var_dump($this->login);
+                if (!$this->login)
+                    throw new \Exception('Login failed.');
+                    
                 break;
                         
             case 'SFTP':
