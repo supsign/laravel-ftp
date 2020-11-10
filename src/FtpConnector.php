@@ -74,15 +74,15 @@ class FtpConnector {
         return $this;
     }
 
-    protected function deleteLocalFile() {
+    public function deleteLocalFile() {
         return $this->delteFile('local');
     }
 
-    protected function deleteRemoteFile() {
+    public function deleteRemoteFile() {
         return $this->delteFile('remote');
     }
 
-    protected function downloadFile() {
+    public function downloadFile() {
         switch ($this->protocol) {
             case 'FTP':
                 ftp_get($this->connection, $this->localFile, $this->remoteFile);
@@ -96,7 +96,7 @@ class FtpConnector {
         return $this;
     }
 
-    protected function getFiles() {
+    public function getFiles() {
         return array_keys(
             array_merge(
                 array_flip($this->readLocalDirectory()),
@@ -149,11 +149,11 @@ class FtpConnector {
         return file_exists($this->getFilePath($source));
     }
 
-    protected function fileExistsLocal() {
+    public function fileExistsLocal() {
         return $this->fileExists('local');
     }
 
-    protected function fileExistsRemote() {
+    public function fileExistsRemote() {
         return $this->fileExists('remote');
     }
 
@@ -184,7 +184,7 @@ class FtpConnector {
         return $this;
     }
 
-    protected function uploadFile() {
+    public function uploadFile() {
         switch ($this->protocol) {
             case 'FTP':
                 ftp_put($this->connection, $this->remoteFile, $this->localFile);
@@ -194,8 +194,6 @@ class FtpConnector {
                 copy($this->localFile, $this->remoteFile);
                 break;
         }
-
-        
 
         return $this;
     }
@@ -220,8 +218,14 @@ class FtpConnector {
         return $this->readFile('remote');
     }
 
-    protected function setLocalDirectory($dir) {
+    public function setLocalDirectory($dir) {
         $this->localDirectory = $this->localRootDirectory.$dir;
+
+        return $this;
+    }
+
+    public function setLocalFile($file) {
+        $this->localFile = $file;
 
         return $this;
     }
@@ -232,7 +236,7 @@ class FtpConnector {
         return $this;
     }
 
-    protected function setRemoteDirectory($dir) {
+    public function setRemoteDirectory($dir) {
         switch ($this->protocol) {
             case 'SFTP':
                 $this->remoteDirectory = 'ssh2.sftp://'.$this->login.$dir;
@@ -242,6 +246,12 @@ class FtpConnector {
                 $this->remoteDirectory = $dir;
                 break;
         }
+
+        return $this;
+    }
+
+    public function setRemoteFile($file) {
+        $this->remoteFile = $file;
 
         return $this;
     }
