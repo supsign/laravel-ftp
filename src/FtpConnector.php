@@ -12,9 +12,9 @@ class FtpConnector {
         $ftpConnections = [],
         $localDirectory = null,
         $localFile = null,
-        $localRootDirectory = '',
+        $localRootDirectory = '/',
         $login = null,
-        $remoteDirectory = null,
+        $remoteDirectory = '/',
         $remoteFile = null,
         $password = null,
         $port = null,
@@ -28,9 +28,6 @@ class FtpConnector {
         $this->port = env($ftpData.'_FTP_PORT');
         $this->user = env($ftpData.'_FTP_LOGIN');
         $this->password = env($ftpData.'_FTP_PASSWORD');
-
-        $this->remoteDirectory = '.';
-
 
         return $this->connect()->login();
     }
@@ -261,7 +258,7 @@ class FtpConnector {
     protected function readDirectory($dir) {        
         switch ($this->protocol) {
             case 'FTP':
-                return ftp_nlist($this->connection, $this->remoteDirectory);
+                return ftp_nlist($this->connection, $dir);
                 break;
             
             case 'SFTP':
