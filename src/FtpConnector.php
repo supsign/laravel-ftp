@@ -28,6 +28,7 @@ class FtpConnector {
         $this->port = env($ftpData.'_FTP_PORT');
         $this->user = env($ftpData.'_FTP_LOGIN');
         $this->password = env($ftpData.'_FTP_PASSWORD');
+        $this->passive = env($ftpData.'_FTP_PASSIVE') ?: false;
 
         return $this->connect()->login();
     }
@@ -36,9 +37,7 @@ class FtpConnector {
         switch ($this->protocol) {
             case 'FTP':
                 $this->connection = ftp_connect($this->server, (int)$this->port);
-
-                // ftp_pasv($this->connection, true);
-
+                ftp_pasv($this->connection, $this->passive);
                 break;
             
             case 'SFTP':
