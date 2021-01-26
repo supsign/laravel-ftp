@@ -38,7 +38,7 @@ class FtpConnector {
             case 'FTP':
                 $this->connection = ftp_connect($this->server, (int)$this->port);
                 ftp_pasv($this->connection, $this->passive);
-                ftp_set_option($this->connection, FTP_TIMEOUT_SEC, 300);
+                ftp_set_option($this->connection, FTP_TIMEOUT_SEC, 1200);
                 break;
             
             case 'SFTP':
