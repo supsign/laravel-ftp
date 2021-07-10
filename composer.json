@@ -1,5 +1,5 @@
 {
-    "name": "supsign/laravel-ftp-connector",
+    "name": "supsign/laravel-ftp",
     "description": "Laravel Extension for Handling FTP connections",
     "keywords": ["composer", "script", "FTP"],
     "license": "MIT",
