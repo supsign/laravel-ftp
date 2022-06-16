@@ -33,6 +33,20 @@ class FtpConnector {
         return $this->connect()->login();
     }
 
+    public function __destruct()
+    {
+        switch ($this->protocol) {
+            case 'FTP':
+                ftp_close($this->connection);
+                break;
+            
+            case 'SFTP':
+            default:
+                ssh2_disconnect($this->connection);
+                break;
+        }
+    }
+
     protected function connect() {
         switch ($this->protocol) {
             case 'FTP':
@@ -86,7 +100,7 @@ class FtpConnector {
                 break;
             
             case 'SFTP':
-                copy($this->remoteFile, $this->localFile);
+                copy($this->getFilePath('remote'), $this->getFilePath('local'));
                 break;
         }
 
@@ -104,8 +118,8 @@ class FtpConnector {
 
     protected function getFilePath($source) {
         switch ($source) {
-            case 'local': return $this->localFile;
-            case 'remote': return $this->remoteFile;
+            case 'local': return $this->localDirectory.$this->localFile;
+            case 'remote': return $this->remoteDirectory.$this->remoteFile;
             default: throw new \Exception('invalid file source');
         }
     }
@@ -236,9 +250,11 @@ class FtpConnector {
     }
 
     public function setRemoteDirectory($dir) {
+        $dir = trim($dir, '/').'/';
+
         switch ($this->protocol) {
             case 'SFTP':
-                $this->remoteDirectory = 'ssh2.sftp://'.$this->login.$dir;
+                $this->remoteDirectory = 'ssh2.sftp://'.$this->login.'/'.$dir;
                 break;
             
             default:
@@ -291,32 +307,4 @@ class FtpConnector {
 
         return $files;
     }
-
-    public function test()
-    {
-
-        $this->login();
-
-        var_dump($this->connection, $this->remoteDirectory);
-
-
-        // return ftp_get($this->connection, 'test.csv', 'test.csv');
-
-        return ftp_nlist($this->connection, $this->remoteDirectory);
-
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-
-
 }
