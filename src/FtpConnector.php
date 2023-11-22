@@ -2,6 +2,8 @@
 
 namespace Supsign\LaravelFtpConnector;
 
+use Exception;
+
 class FtpConnector {
     protected 
         $connection = null,
@@ -51,6 +53,11 @@ class FtpConnector {
         switch ($this->protocol) {
             case 'FTP':
                 $this->connection = ftp_connect($this->server, (int)$this->port);
+
+                if (!$this->connection) {
+                    throw new Exception('Could not connect to "'.$this->server.':'.$this->port, 1);
+                }
+
                 ftp_pasv($this->connection, $this->passive);
                 ftp_set_option($this->connection, FTP_TIMEOUT_SEC, 1200);
                 break;
