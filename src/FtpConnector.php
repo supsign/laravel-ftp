@@ -2,8 +2,6 @@
 
 namespace Supsign\LaravelFtpConnector;
 
-use Exception;
-
 class FtpConnector {
     protected 
         $connection = null,
@@ -49,13 +47,14 @@ class FtpConnector {
         }
     }
 
-    protected function connect() {
+    protected function connect(): self
+    {
         switch ($this->protocol) {
             case 'FTP':
                 $this->connection = ftp_connect($this->server, (int)$this->port);
 
                 if (!$this->connection) {
-                    throw new Exception('Could not connect to "'.$this->server.':'.$this->port, 1);
+                    throw new \Exception('Could not connect to "'.$this->server.':'.$this->port, 1);
                 }
 
                 ftp_pasv($this->connection, $this->passive);
@@ -74,10 +73,13 @@ class FtpConnector {
         return $this;
     }
 
-    protected function disconnect() {
+    protected function disconnect(): self
+    {
+        return $this;
     }
 
-    protected function delteFile($source) {
+    protected function delteFile($source): self
+    {
         switch (true) {
             case $this->protocol = 'FTP' AND $source == 'remote':
                 ftp_delete($this->getFilePath($source));
@@ -92,15 +94,18 @@ class FtpConnector {
         return $this;
     }
 
-    public function deleteLocalFile() {
+    public function deleteLocalFile(): self
+    {
         return $this->delteFile('local');
     }
 
-    public function deleteRemoteFile() {
+    public function deleteRemoteFile(): self
+    {
         return $this->delteFile('remote');
     }
 
-    public function downloadFile() {
+    public function downloadFile(): self
+    {
         switch ($this->protocol) {
             case 'FTP':
                 ftp_get($this->connection, $this->localFile, $this->remoteFile);
@@ -114,7 +119,8 @@ class FtpConnector {
         return $this;
     }
 
-    public function getFiles() {
+    public function getFiles(): array
+    {
         return array_keys(
             array_merge(
                 array_flip($this->readLocalDirectory()),
@@ -123,7 +129,8 @@ class FtpConnector {
         );  
     }
 
-    protected function getFilePath($source) {
+    protected function getFilePath($source): string
+    {
         switch ($source) {
             case 'local': return $this->localDirectory.$this->localFile;
             case 'remote': return $this->remoteDirectory.$this->remoteFile;
@@ -131,53 +138,66 @@ class FtpConnector {
         }
     }
 
-    protected function getFileHash($source) {
+    protected function getFileHash($source): string
+    {
         return hash_file('md5', $this->getFilePath($source)) ;
     }
 
-    protected function getFileTime($source, $format = null) {
-        if (!file_exists($this->getFilePath($source)))
+    protected function getFileTime($source, $format = null): int|string
+    {
+        if (!file_exists($this->getFilePath($source))) {
             return false;
+        }
 
         $filetime = filemtime($this->getFilePath($source));
 
-        if ($format AND $filetime)
+        if ($format AND $filetime) {
             return (new \DateTime())->setTimestamp($filetime)->format($format);
+        }
 
         return $filetime;
     }
 
-    protected function getLocalFileHash(){
+    protected function getLocalFileHash(): string
+    {
         return $this->getFileHash('local');
     }
 
-    protected function getLocalFileTime($format = null) {
+    protected function getLocalFileTime($format = null): int|string
+    {
         return $this->getFileTime('local', $format);
     }
 
-    protected function getRemoteFileHash(){
+    protected function getRemoteFileHash(): string
+    {
         return $this->getFileHash('remote');
     }
 
-    protected function getRemoteFileTime($format = null) {
+    protected function getRemoteFileTime($format = null): int|string
+    {
         return $this->getFileTime('remote', $format);
     }
 
-    protected function fileExists($source) {
+    protected function fileExists($source): bool
+    {
         return file_exists($this->getFilePath($source));
     }
 
-    public function fileExistsLocal() {
+    public function fileExistsLocal(): bool
+    {
         return $this->fileExists('local');
     }
 
-    public function fileExistsRemote() {
+    public function fileExistsRemote(): bool
+    {
         return $this->fileExists('remote');
     }
 
-    protected function login() {
-        if (!$this->connection)
+    protected function login(): self
+    {
+        if (!$this->connection) {
             $this->connect();
+        }
 
         switch ($this->protocol) {
             case 'FTP':
@@ -195,8 +215,11 @@ class FtpConnector {
 
                 $this->login = ssh2_sftp($this->connection);
 
-                if (!$this->login)
+                if (!$this->login) {
                     throw new \Exception('Could not initialize SFTP subsystem.');
+                }
+
+                $this->setRemoteDirectory();
 
                 break;
         }
@@ -204,7 +227,8 @@ class FtpConnector {
         return $this;
     }
 
-    public function uploadFile() {
+    public function uploadFile(): self
+    {
         switch ($this->protocol) {
             case 'FTP':
                 ftp_put($this->connection, $this->remoteFile, $this->localFile);
@@ -218,50 +242,63 @@ class FtpConnector {
         return $this;
     }
 
-    protected function readLocalDirectory() {
+    protected function readLocalDirectory(): array
+    {
         return $this->readDirectory($this->localDirectory);
     }
 
-    protected function readFile($source) {
+    protected function readFile($source): string
+    {
         return file_get_contents($this->getFilePath($source));
     }
 
-    protected function readLocalFile() {
+    protected function readLocalFile(): string
+    {
         return $this->readFile('local');
     }
 
-    public function readRemoteDirectory() {
+    public function readRemoteDirectory(): array
+    {
         return $this->readDirectory($this->remoteDirectory);
     }
 
-    protected function readRemoteFile() {
+    protected function readRemoteFile(): string
+    {
         return $this->readFile('remote');
     }
 
-    public function setLocalDirectory($dir) {
+    public function setLocalDirectory($dir): self
+    {
         $this->localDirectory = $this->localRootDirectory.$dir;
 
         return $this;
     }
 
-    public function setLocalFile($file) {
+    public function setLocalFile($file): self
+    {
         $this->localFile = $file;
 
         return $this;
     }
 
-    public function setLocalRootDirectory($dir) {
+    public function setLocalRootDirectory($dir): self
+    {
         $this->localRootDirectory = $dir;
 
         return $this;
     }
 
-    public function setRemoteDirectory($dir) {
+    public function setRemoteDirectory(string $dir = null): self
+    {
         $dir = trim($dir, '/').'/';
 
         switch ($this->protocol) {
             case 'SFTP':
-                $this->remoteDirectory = 'ssh2.sftp://'.$this->login.'/'.$dir;
+                $this->remoteDirectory = 'ssh2.sftp://'.$this->login;
+
+                if (!is_null($dir)) {
+                    $this->remoteDirectory .= '/'.$dir;
+                }
                 break;
             
             default:
@@ -272,13 +309,15 @@ class FtpConnector {
         return $this;
     }
 
-    public function setRemoteFile($file) {
+    public function setRemoteFile($file): self
+    {
         $this->remoteFile = $file;
 
         return $this;
     }
 
-    protected function readDirectory($dir) {        
+    protected function readDirectory(string $dir): array
+    {       
         switch ($this->protocol) {
             case 'FTP':
                 return ftp_nlist($this->connection, $dir);
@@ -291,17 +330,16 @@ class FtpConnector {
                     $currentDir = scandir($dir);
 
                     foreach ($currentDir AS $entry) {
-                        if ($entry[0] == '.')
+                        if ($entry[0] === '.' || $entry[0] === '~') {
                             continue;
-
-                        if ($entry[0] == '~')
-                            continue;
+                        }
 
                         if (is_dir($dir.$entry)) {
                             $entry .= '/';
 
-                            foreach ($this->readDirectory($dir.$entry) AS $subEntry)
+                            foreach ($this->readDirectory($dir.$entry) AS $subEntry) {
                                 $files[] = $entry.$subEntry;
+                            }
 
                             continue;
                         }
